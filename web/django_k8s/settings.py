@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
-
+from django.core.management.utils import get_random_secret_key
+SECRET_KEY_RANDOM = get_random_secret_key()
+print(SECRET_KEY_RANDOM)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=tyb2*cwi55-#6of=fdc6n-+mui5--@*fnn+k+et(+#9%i0phv'
-
+# SECRET_KEY = 'django-insecure-=tyb2*cwi55-#6of=fdc6n-+mui5--@*fnn+k+et(+#9%i0phv'
+SECRET_KEY = SECRET_KEY_RANDOM
+print("SECRET_KEY", SECRET_KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -79,6 +83,33 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DB_USERNAME=os.environ.get("POSTGRES_USER")
+DB_PASSWORD=os.environ.get("POSTGRES_PASSWORD")
+DB_HOST=os.environ.get("POSTGRES_HOST")
+DB_PORT=os.environ.get("POSTGRES_PORT")
+DB_DATABASE=os.environ.get("POSTGRES_DB")
+DB_IS_AVAIL = all([
+        DB_USERNAME, 
+        DB_PASSWORD, 
+        DB_HOST,
+        DB_PORT,
+        DB_DATABASE
+])
+POSTGRES_READY = str(os.environ.get('POSTGRES_READY')) == '1'
+
+if DB_IS_AVAIL and POSTGRES_READY:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": DB_DATABASE,
+            "USER": DB_USERNAME,
+            "PASSWORD": DB_PASSWORD,
+            "HOST": DB_HOST,
+            "PORT": DB_PORT,
+        }
+    }
+
 
 
 # Password validation
